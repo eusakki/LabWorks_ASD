@@ -2,18 +2,26 @@ package com.company.lvl3;
 import java.util.ArrayList;
 
 public class Stack {
-    private ArrayList<String> elements;
+    private String[] elements;
+    private int top;
+    private int capacity;
 
-    public Stack() {
-        elements = new ArrayList<>();
+    public Stack(int size) {
+        capacity = size;
+        elements = new String[capacity];
+        top = -1;
     }
 
     public void add(String value) {
-        elements.add(value);
+        if (top == capacity - 1) {
+            System.out.println("Stack is full!");
+            return;
+        }
+        elements[++top] = value;
     }
 
     private boolean isEmpty() {
-        return elements.isEmpty();
+        return top == -1;
     }
 
     public String delete() {
@@ -21,7 +29,7 @@ public class Stack {
             System.out.println("Stack is empty!");
             return null;
         }
-        return elements.remove(elements.size() - 1);
+        return elements[top--];
     }
 
     public void printStack() {
@@ -30,9 +38,9 @@ public class Stack {
             return;
         }
 
-        System.out.println("The contents of the stack:");
-        for (int i = elements.size() - 1; i >= 0; i--) {
-            System.out.println(elements.get(i));
+        System.out.println("The elements of the stack:");
+        for (int i = top; i >= 0; i--) {
+            System.out.println(elements[i]);
         }
     }
 }

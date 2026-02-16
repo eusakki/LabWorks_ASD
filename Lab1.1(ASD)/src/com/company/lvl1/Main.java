@@ -3,7 +3,7 @@ package com.company.lvl1;
 public class Main {
 
     public static void main(String[] args) {
-        Stack stack = new Stack();
+        Stack stack = new Stack(5);
 
         stack.add("25");    //21
         stack.add("123");   //83
