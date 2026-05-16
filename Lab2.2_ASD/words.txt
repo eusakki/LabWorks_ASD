@@ -1,0 +1,10 @@
+abc_123
+hello_WORLD
+test_999
+abc
+java_ABC
+wrong-word
+a_1
+abc_123ABC
+my_VAR
+hello_777
