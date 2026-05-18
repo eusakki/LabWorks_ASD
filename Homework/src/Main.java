@@ -12,7 +12,7 @@ public class Main {
         double[][] A = new double[n][n];
         double[] b = new double[n];
 
-        System.out.println("Enter matrix coefficiens:");
+        System.out.println("Enter matrix coefficients:");
 
         for (int i = 0; i < n; i++) {
             System.out.println("Equation " + (i + 1));

@@ -1,77 +1,84 @@
 public class LUPSolver {
     private final int n;
-    private final double[][] A;
     private final double[][] L;
     private final double[][] U;
     private final double[][] P;
 
-    public LUPSolver(double[][] matrix) {
-        n = matrix.length;
+    public LUPSolver(double[][] A) {
+        n = A.length;
 
-        A = new double[n][n];
         L = new double[n][n];
         U = new double[n][n];
         P = new double[n][n];
 
+        // Matrix's copy
+        double[][] LU = new double[n][n];
+
         for (int i = 0; i < n; i++) {
-            System.arraycopy(matrix[i], 0, A[i], 0, n);
+            System.arraycopy(A[i], 0, LU[i], 0, n);
         }
 
         for (int i = 0; i < n; i++) {
             P[i][i] = 1;
         }
 
-        decompose();
+        decompose(LU);
     }
 
-    private void decompose() {
-        for (int i = 0; i < n; i++) {
-            double max = Math.abs(A[i][i]);
-            int pivot = i;
+    private void decompose(double[][] LU) {
+        for (int k = 0; k < n; k++) {
+            double max = 0;
+            int pivot = k;
 
-            for (int j = i + 1; j < n; j++) {
-                if (Math.abs(A[j][i]) > max) {
-                    max = Math.abs(A[j][i]);
-                    pivot = j;
+            for (int i = k; i < n; i++) {
+                if (Math.abs(LU[i][k]) > max) {
+                    max = Math.abs(LU[i][k]);
+                    pivot = i;
                 }
             }
 
-            if (pivot != i) {
-                double[] temp = A[i];
-                A[i] = A[pivot];
-                A[pivot] = temp;
+            if (max == 0) {
+                throw new RuntimeException("Matrix is singular!");
+            }
 
-                double[] tempP = P[i];
-                P[i] = P[pivot];
+            // Rearranging rows
+            if (pivot != k) {
+                double[] temp = LU[k];
+                LU[k] = LU[pivot];
+                LU[pivot] = temp;
+
+                double[] tempP = P[k];
+                P[k] = P[pivot];
                 P[pivot] = tempP;
 
-                for (int k = 0; k < i; k++) {
-                    double t = L[i][k];
-                    L[i][k] = L[pivot][k];
-                    L[pivot][k] = t;
+                // Rearranging L
+                for (int j = 0; j < k; j++) {
+                    double t = L[k][j];
+                    L[k][j] = L[pivot][j];
+                    L[pivot][j] = t;
                 }
             }
 
+            // Calculation
+            for (int i = k + 1; i < n; i++) {
+                LU[i][k] /= LU[k][k];
+
+                for (int j = k + 1; j < n; j++) {
+                    LU[i][j] -= LU[i][k] * LU[k][j];
+                }
+            }
+        }
+
+        // Splitting LU into L and U
+        for (int i = 0; i < n; i++) {
             L[i][i] = 1;
 
-            for (int j = i; j < n; j++) {
-                double sum = 0;
-
-                for (int k = 0; k < i; k++) {
-                    sum += L[i][k] * U[k][j];
+            for (int j = 0; j < n; j++) {
+                if (i > j) {
+                    L[i][j] = LU[i][j];
+                } else {
+                    U[i][j] = LU[i][j];
                 }
-
-                U[i][j] = A[i][j] - sum;
-            }
-
-            for (int j = i + 1; j < n; j++) {
-                double sum = 0;
-
-                for (int k = 0; k < i; k++) {
-                    sum += L[j][k] * U[k][i];
-                }
-
-                L[j][i] = (A[j][i] - sum) / U[i][i];
             }
         }
     }
@@ -79,42 +86,32 @@ public class LUPSolver {
     public double[] solve(double[] b) {
         double[] Pb = new double[n];
 
-        // Pb = P * b
         for (int i = 0; i < n; i++) {
-
-            double sum = 0;
-
             for (int j = 0; j < n; j++) {
-                sum += P[i][j] * b[j];
+                Pb[i] += P[i][j] * b[j];
             }
-
-            Pb[i] = sum;
         }
 
         double[] y = new double[n];
 
         for (int i = 0; i < n; i++) {
-
-            double sum = 0;
+            y[i] = Pb[i];
 
             for (int j = 0; j < i; j++) {
-                sum += L[i][j] * y[j];
+                y[i] -= L[i][j] * y[j];
             }
-
-            y[i] = Pb[i] - sum;
         }
 
         double[] x = new double[n];
 
         for (int i = n - 1; i >= 0; i--) {
-
-            double sum = 0;
+            x[i] = y[i];
 
             for (int j = i + 1; j < n; j++) {
-                sum += U[i][j] * x[j];
+                x[i] -= U[i][j] * x[j];
             }
 
-            x[i] = (y[i] - sum) / U[i][i];
+            x[i] /= U[i][i];
         }
 
         return x;
